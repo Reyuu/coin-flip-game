@@ -3,6 +3,23 @@ import pygame
 import ezpygame
 import math
 
+#TODO: handle bets, choose t and h side
+
+def isPointInsideRect(pos, rect):
+    """
+    Checks if point is inside some rectangle (Rect object)
+    :param x: horizontal
+    :param y: vertical
+    :param rect: rect to check inside
+    :return: bool
+    """
+    x = pos[0]
+    y = pos[1]
+    if (x > rect[0]) and (x < rect[0]+rect[2]) and (y > rect[1]) and (y < rect[1]+rect[3]):
+        return True
+    else:
+        return False
+
 class Coin:
     def __init__(self, name="Coin"):
         self.name = name
@@ -51,6 +68,9 @@ class GameScene(ezpygame.Scene):
         super().__init__()
         self.coin = Coin()
         self.currency = Flowers()
+        self.bet = 0
+        self.current_bet = "tails"
+        self.bet_rate = 0.95
         self.font = pygame.font.SysFont("Monospace", size=12)
 
     def on_enter(self, previous_scene):
@@ -59,6 +79,22 @@ class GameScene(ezpygame.Scene):
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             pos = pygame.mouse.get_pos()
+            if isPointInsideRect(pos, (100, 100, 100, 100)):
+                self.coin.flip()
+                if self.coin.sides[self.coin.side] == self.current_bet:
+                    self.currency.amount += int(self.bet*self.bet_rate)
+                else:
+                   self.currency.amount -= self.bet 
+            if isPointInsideRect(pos, (10, 10, 10, 10)):
+                if self.currency.amount > self.bet+1:
+                    self.bet += 1
+            if isPointInsideRect(pos, (28, 10, 10, 10)):
+                if 0 <= self.bet-1:
+                    self.bet -= 1
+            if isPointInsideRect(pos, (28+18, 10, 10, 10)):
+                self.current_bet = "tails"
+            if isPointInsideRect(pos, (28+2*18, 10, 10, 10)):
+                self.current_bet = "heads"
 
 
     def draw(self, screen):
@@ -67,11 +103,22 @@ class GameScene(ezpygame.Scene):
         pygame.draw.rect(screen, (250, 5, 5), (28, 10, 10, 10))
         screen.blit(self.font.render("+", True, (255, 255, 255)), (10, 10))
         screen.blit(self.font.render("-", True, (255, 255, 255)), (28, 10))
+        screen.blit(self.font.render("tails", True, (255, 255, 255)), (28+18, 10))
+        screen.blit(self.font.render("heads", True, (255, 255, 255)), (28+2*18, 10))
+        if self.current_bet == "tails":
+            pygame.draw.rect(screen, (0, 255, 0), (28+18, 10, 10, 10))
+        else:
+            pygame.draw.rect(screen, (255, 0, 0), (28+18, 10, 10, 10))
+
+        if self.current_bet == "heads":
+            pygame.draw.rect(screen, (0, 255, 0), (28+2*18, 10, 10, 10))
+        else:
+            pygame.draw.rect(screen, (255, 0, 0), (28+2*18, 10, 10, 10))
 
         pygame.draw.rect(screen, (255, 0, 255), (100, 100, 100, 100))
         screen.blit(self.font.render("Coin flip", True, (255, 255, 255)), (150, 150))
-        screen.blit(self.font.render("Coin side: %s" % self.coin.sides[self.coin.side], True, (255, 255, 255)), (0, 480))
-
+        screen.blit(self.font.render("Coin side: %s" % self.coin.sides[self.coin.side], True, (255, 255, 255)), (0, 400))
+        screen.blit(self.font.render("Bet: %s  Flowers: %s" % (self.bet, self.currency.amount), True, (255, 255, 255)), (0, 416))
 
 
 app = ezpygame.Application(
