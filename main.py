@@ -51,12 +51,27 @@ class GameScene(ezpygame.Scene):
         super().__init__()
         self.coin = Coin()
         self.currency = Flowers()
+        self.font = pygame.font.SysFont("Monospace", size=12)
 
     def on_enter(self, previous_scene):
         self.application.title = "Game(2)"
 
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            pos = pygame.mouse.get_pos()
+
+
     def draw(self, screen):
         screen.fill((0,0,0))
+        pygame.draw.rect(screen, (250, 5, 5), (10, 10, 10, 10))
+        pygame.draw.rect(screen, (250, 5, 5), (28, 10, 10, 10))
+        screen.blit(self.font.render("+", True, (255, 255, 255)), (10, 10))
+        screen.blit(self.font.render("-", True, (255, 255, 255)), (28, 10))
+
+        pygame.draw.rect(screen, (255, 0, 255), (100, 100, 100, 100))
+        screen.blit(self.font.render("Coin flip", True, (255, 255, 255)), (150, 150))
+        screen.blit(self.font.render("Coin side: %s" % self.coin.sides[self.coin.side], True, (255, 255, 255)), (0, 480))
+
 
 
 app = ezpygame.Application(
@@ -65,7 +80,7 @@ app = ezpygame.Application(
         update_rate=60,
 )
 menu = MenuScene()
-app.run(menu)
+app.run(GameScene())
 """
 class Game:
     def __init__(self):
